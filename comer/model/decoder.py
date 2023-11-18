@@ -108,6 +108,9 @@ class Decoder(nn.Module):
         FloatTensor
             [b, l, vocab_size]
         """
+        if not hasattr(self, 'device'):
+            setattr(self, 'device', src.device)
+            
         _, l = tgt.size()
         tgt_mask = self._build_attention_mask(l)
         tgt_pad_mask = tgt == self.PAD_IDX

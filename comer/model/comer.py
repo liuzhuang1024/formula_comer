@@ -72,7 +72,28 @@ class CoMER(nn.Module):
             mask = torch.cat((mask, mask), dim=0)
         out = self.decoder(feature, mask, tgt)
         return out
+    
+    def inference(self, img, img_mask, max_len, **kwargs):
+        if not hasattr(self, 'device'):
+            setattr(self, 'device', img.device)
 
+        feature, mask = self.encoder(img, img_mask)  # [b, t, d] # mask: 1 is mask position
+        if hasattr(self, 'bttr') and self.bttr:
+            # close BTTR hand 
+            feature = torch.cat((feature, feature), dim=0)  # [2b, t, d]
+            mask = torch.cat((mask, mask), dim=0)
+        
+        # attention tgt shape
+        batch = feature.shape[0]
+        preds = torch.ones(batch, 1, dtype=torch.long).to(self.device) 
+        for index in range(1, max_len+1):
+            out = self.decoder(feature, mask, preds[:, :index])
+            preds = torch.cat([preds, torch.argmax(out, dim=-1)], dim=-1)
+        return out
+    
+    def stop(self, out):
+        return False
+    
     def beam_search(
         self,
         img: FloatTensor,

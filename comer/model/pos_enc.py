@@ -82,6 +82,8 @@ class ImgPosEnc(nn.Module):
         torch.Tensor
             [b, h, w, d]
         """
+        if not hasattr(self, 'device'):
+            setattr(self, 'device', x.device)
         not_mask = ~mask
         y_embed = not_mask.cumsum(1, dtype=torch.float32)
         x_embed = not_mask.cumsum(2, dtype=torch.float32)

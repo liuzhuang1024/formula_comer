@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import List, Tuple
 
 # import pytorch_lightning as pl
+from torch import nn
 import torch
 import torch.nn.functional as F
 from comer.datamodule import vocab, vocab_size
