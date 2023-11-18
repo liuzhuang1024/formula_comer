@@ -15,4 +15,4 @@ model:
   vocab_size: 3000
   padding_idx: 2
   # other
-  bttr: False
+  bttr: false
