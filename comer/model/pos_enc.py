@@ -1,12 +1,13 @@
 import math
 from typing import Optional
 
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
+from torch import nn
 import torch
 from einops import rearrange, repeat
 
 
-class WordPosEnc(pl.LightningModule):
+class WordPosEnc(nn.Module):
     def __init__(
         self, d_model: int = 512, max_len: int = 500, temperature: float = 10000.0
     ) -> None:
@@ -42,7 +43,7 @@ class WordPosEnc(pl.LightningModule):
         return x
 
 
-class ImgPosEnc(pl.LightningModule):
+class ImgPosEnc(nn.Module):
     """
     This is a more standard version of the position embedding, very similar to the one
     used by the Attention is all you need paper, generalized to work on images.
@@ -112,7 +113,7 @@ def rotate_every_two(x: torch.FloatTensor):
     return rearrange(x, "... d j -> ... (d j)")
 
 
-class WordRotaryEmbed(pl.LightningModule):
+class WordRotaryEmbed(nn.Module):
     """
     Rotary Positional Embedding
     Ref : https://zhuanlan.zhihu.com/p/359502624
@@ -153,7 +154,7 @@ class WordRotaryEmbed(pl.LightningModule):
         return x
 
 
-class ImageRotaryEmbed(pl.LightningModule):
+class ImageRotaryEmbed(nn.Module):
     """
     2-D Generalized version of WordRotaryEmbedding
     """

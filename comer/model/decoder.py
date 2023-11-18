@@ -5,14 +5,14 @@ import torch.nn as nn
 from einops import rearrange
 from torch import FloatTensor, LongTensor
 
-from comer.datamodule import vocab, vocab_size
+# from comer.datamodule import vocab, vocab_size
 from comer.model.pos_enc import WordPosEnc
 from comer.model.transformer.arm import AttentionRefinementModule
 from comer.model.transformer.transformer_decoder import (
     TransformerDecoder,
     TransformerDecoderLayer,
 )
-from comer.utils.generation_utils import DecodeModel
+# from comer.utils.generation_utils import DecodeModel
 
 
 def _build_transformer_decoder(
@@ -40,7 +40,7 @@ def _build_transformer_decoder(
     return decoder
 
 
-class Decoder(DecodeModel):
+class Decoder(nn.Module):
     def __init__(
         self,
         d_model: int,
@@ -51,9 +51,14 @@ class Decoder(DecodeModel):
         dc: int,
         cross_coverage: bool,
         self_coverage: bool,
+        vocab_size: int,
+        padding_idx: int,
+        **kwargs
     ):
         super().__init__()
-
+        self.vocab_size = vocab_size
+        self.PAD_IDX = padding_idx
+        
         self.word_embed = nn.Sequential(
             nn.Embedding(vocab_size, d_model), nn.LayerNorm(d_model)
         )
@@ -105,7 +110,7 @@ class Decoder(DecodeModel):
         """
         _, l = tgt.size()
         tgt_mask = self._build_attention_mask(l)
-        tgt_pad_mask = tgt == vocab.PAD_IDX
+        tgt_pad_mask = tgt == self.PAD_IDX
 
         tgt = self.word_embed(tgt)  # [b, l, d]
         tgt = self.pos_enc(tgt)  # [b, l, d]

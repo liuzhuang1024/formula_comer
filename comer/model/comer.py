@@ -1,16 +1,17 @@
 from typing import List
 
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
+from torch import nn
 import torch
 from torch import FloatTensor, LongTensor
 
-from comer.utils.utils import Hypothesis
+# from comer.utils.utils import Hypothesis
 
 from .decoder import Decoder
 from .encoder import Encoder
 
 
-class CoMER(pl.LightningModule):
+class CoMER(nn.Module):
     def __init__(
         self,
         d_model: int,
@@ -23,9 +24,13 @@ class CoMER(pl.LightningModule):
         dc: int,
         cross_coverage: bool,
         self_coverage: bool,
+        **kwargs
     ):
         super().__init__()
-
+        for k, v in kwargs.items():
+            if not hasattr(self, k):
+                setattr(self, k, v)
+                
         self.encoder = Encoder(
             d_model=d_model, growth_rate=growth_rate, num_layers=num_layers
         )
@@ -38,8 +43,9 @@ class CoMER(pl.LightningModule):
             dc=dc,
             cross_coverage=cross_coverage,
             self_coverage=self_coverage,
+            **kwargs
         )
-
+            
     def forward(
         self, img: FloatTensor, img_mask: LongTensor, tgt: LongTensor
     ) -> FloatTensor:
@@ -59,12 +65,12 @@ class CoMER(pl.LightningModule):
         FloatTensor
             [2b, l, vocab_size]
         """
-        feature, mask = self.encoder(img, img_mask)  # [b, t, d]
-        feature = torch.cat((feature, feature), dim=0)  # [2b, t, d]
-        mask = torch.cat((mask, mask), dim=0)
-
+        feature, mask = self.encoder(img, img_mask)  # [b, t, d] # mask: 1 is mask position
+        if hasattr(self, 'bttr') and self.bttr:
+            # close BTTR hand 
+            feature = torch.cat((feature, feature), dim=0)  # [2b, t, d]
+            mask = torch.cat((mask, mask), dim=0)
         out = self.decoder(feature, mask, tgt)
-
         return out
 
     def beam_search(
@@ -77,7 +83,7 @@ class CoMER(pl.LightningModule):
         early_stopping: bool,
         temperature: float,
         **kwargs,
-    ) -> List[Hypothesis]:
+    ):
         """run bi-direction beam search for given img
 
         Parameters

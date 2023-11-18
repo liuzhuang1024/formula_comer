@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from comer.datamodule import vocab
 from einops import rearrange
 from torch import LongTensor
-from torchmetrics import Metric
+# from torchmetrics import Metric
 
 
 class Hypothesis:

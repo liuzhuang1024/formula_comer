@@ -1,7 +1,8 @@
 import zipfile
 from typing import List
 
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
+from torch import nn
 import torch.optim as optim
 from torch import FloatTensor, LongTensor
 
@@ -11,7 +12,7 @@ from comer.utils.utils import (ExpRateRecorder, Hypothesis, ce_loss,
                                to_bi_tgt_out)
 
 
-class LitCoMER(pl.LightningModule):
+class LitCoMER(nn.Module):
     def __init__(
         self,
         d_model: int,
